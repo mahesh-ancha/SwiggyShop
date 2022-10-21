@@ -19,6 +19,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<SwiggyDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("SwiggyConnectionString")));
 
 //builder.Services.AddScoped<IProductRepository, ProductRepository>();
+//builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<OrderRepository>();
 
 builder.Services.AddScoped<ProductRepository>(sp => {
     // Build your Context Options
@@ -30,6 +32,14 @@ builder.Services.AddScoped<ProductRepository>(sp => {
     // Build your service (and pass in the unit of work)
     ProductRepository svc = new ProductRepository(ctx);
     // Return your Svc
+    return svc;
+});
+
+builder.Services.AddScoped<UserRepository>(sp => {
+    DbContextOptionsBuilder<SwiggyDbContext> optsBuilder = new DbContextOptionsBuilder<SwiggyDbContext>();
+    optsBuilder.UseSqlServer(builder.Configuration.GetConnectionString(("SwiggyConnectionString")));
+    SwiggyDbContext ctx = new SwiggyDbContext(optsBuilder.Options);
+    UserRepository svc = new UserRepository(ctx);
     return svc;
 });
 

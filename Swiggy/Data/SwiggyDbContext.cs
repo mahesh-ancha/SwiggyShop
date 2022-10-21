@@ -12,5 +12,7 @@ namespace Swiggy.Data
        public  DbSet<OrdersModel> Orders { get; set; }
        public DbSet<CustomerModel> Customers { get; set; }
        public  DbSet<ProductsModel> Products { get; set; }
+        public DbSet<UserModel> Users { get; set; }
+
     }
 }

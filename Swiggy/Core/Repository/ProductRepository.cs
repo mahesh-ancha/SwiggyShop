@@ -25,7 +25,6 @@ namespace Swiggy.Core.Repository
         {
             try
             {
-
                 var result = await dbContext.Products.ToListAsync();
                 return (result);
             }
