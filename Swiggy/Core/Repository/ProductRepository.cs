@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swiggy.Core.IRepository;
 using Swiggy.Data;
@@ -20,7 +21,6 @@ namespace Swiggy.Core.Repository
         {
             this.uow = uow;
         }
-
         public async Task<List<ProductsModel>> GetProducts()
         {
             try
@@ -33,6 +33,7 @@ namespace Swiggy.Core.Repository
                 throw e;
             }
         }
+        [Authorize]
         public async Task<ProductsModel> AddProduct(AddProductModel product)
         {
             try

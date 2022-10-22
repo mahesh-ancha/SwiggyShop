@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swiggy.Core.Repository;
+using Swiggy.Data;
 using Swiggy.Models;
 
 namespace Swiggy.Controllers
@@ -10,20 +11,28 @@ namespace Swiggy.Controllers
     public class UserController : Controller
     {
         private readonly UserRepository userRepository;
+        private readonly SwiggyDbContext dbContext;
 
-        public UserController(UserRepository _userRepository)
+        public UserController(UserRepository _userRepository, SwiggyDbContext swiggyDbContext)
         {
             userRepository = _userRepository;
+            dbContext = swiggyDbContext;
         }
         [HttpPost]
         [Route("Register")]
-        public IActionResult Register([FromBody] AddUserModel addUserModel)
+        public async Task<IActionResult> Register([FromBody] AddUserModel addUserModel)
         {
             try
             {
+                //var user=await  dbContext.Users.FindAsync(addUserModel.Email);
+                //if (user != null)
+                //{
+                //    return Ok(user);
+                //}
+
                 var result = userRepository.Register(addUserModel);
-                if (result == null)
-                    return Ok("Email Already Registered");
+                //if (result == null)
+                //    return Ok("Email Already Registered");
                 return Ok(result);
 
             }
@@ -39,9 +48,9 @@ namespace Swiggy.Controllers
             try
             {
                 var login = userRepository.SignIn(signInModel);
-                //if (login == null)
-                //    return NotFound();
-                return Ok(login);
+                if (login == null)
+                    return NotFound();
+                return Ok("Logged Successfully");
             }
             catch(Exception e)
             {

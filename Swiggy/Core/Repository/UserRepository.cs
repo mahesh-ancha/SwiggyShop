@@ -18,7 +18,7 @@ namespace Swiggy.Core.Repository
         {
             try
             {
-                //var result = await dbContext.Users.FindAsync(user);
+                //var result = await dbContext.Users.FindAsync(user.UserId);
                 //if (result != null)
                 //{
                 //    return null;
