@@ -20,4 +20,8 @@
     <PackageReference Include="Unipluss.Sign.Client" Version="1.0.2876" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
 </Project>

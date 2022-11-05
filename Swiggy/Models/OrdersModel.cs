@@ -8,7 +8,7 @@ namespace Swiggy.Models
         [Key]
         public Guid OrderId { get; set; }
         [Required]
-        public string OrderName { get; set; }
+        public string? OrderName { get; set; }
         [Required]
         public int OrderPrice { get; set; }
     }

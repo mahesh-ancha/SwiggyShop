@@ -1,10 +1,14 @@
 using DevExpress.Xpo;
 using FluentAssertions.Common;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Swiggy.Core.IRepository;
 using Swiggy.Core.Repository;
 using Swiggy.Data;
+using Microsoft.AspNetCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,8 +23,13 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<SwiggyDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("SwiggyConnectionString")));
 
 //builder.Services.AddScoped<IProductRepository, ProductRepository>();
-//builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<IUserRepository ,UserRepository>();
 builder.Services.AddScoped<OrderRepository>();
+//builder.Services.AddSingleton<IUserRepository, UserRepository>();
+
+//builder.Services.AddDefaultIdentity<UserRepository>()
+//                .AddRoles<IdentityRole>()
+//                .AddEntityFrameworkStores<SwiggyDbContext>();
 
 builder.Services.AddScoped<ProductRepository>(sp => {
     // Build your Context Options
@@ -35,13 +44,30 @@ builder.Services.AddScoped<ProductRepository>(sp => {
     return svc;
 });
 
-builder.Services.AddScoped<UserRepository>(sp => {
-    DbContextOptionsBuilder<SwiggyDbContext> optsBuilder = new DbContextOptionsBuilder<SwiggyDbContext>();
-    optsBuilder.UseSqlServer(builder.Configuration.GetConnectionString(("SwiggyConnectionString")));
-    SwiggyDbContext ctx = new SwiggyDbContext(optsBuilder.Options);
-    UserRepository svc = new UserRepository(ctx);
-    return svc;
-});
+//builder.Services.AddScoped<UserRepository>(sp1 =>
+//{
+//    DbContextOptionsBuilder<SwiggyDbContext> optsBuild = new DbContextOptionsBuilder<SwiggyDbContext>();
+//    optsBuild.UseSqlServer(builder.Configuration.GetConnectionString(("SwiggyConnectionString")));
+//    SwiggyDbContext cox = new SwiggyDbContext(optsBuild.Options);
+//    UserRepository svc = new UserRepository(cox);
+//    return svc;
+//});
+
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.ExpireTimeSpan = new TimeSpan(0, 10, 0);
+        options.Events.OnRedirectToLogin = (context) =>
+        {
+            context.Response.StatusCode = 401;
+            return Task.CompletedTask;
+        };
+    }
+    );
+
+
+
 
 
 var app = builder.Build();
@@ -54,6 +80,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

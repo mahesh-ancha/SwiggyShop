@@ -33,7 +33,7 @@ namespace Swiggy.Controllers
             
         }
         [HttpPost]
-        public async Task<IActionResult> AddProduct([FromBody] AddProductModel addProductModel)
+        public  IActionResult AddProduct([FromBody] AddProductModel addProductModel)
         {
             try
             {
@@ -70,7 +70,7 @@ namespace Swiggy.Controllers
             }
             catch(Exception e)
             {
-                return NotFound();
+                return NotFound(e);
             }
         }
     }

@@ -1,19 +1,33 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swiggy.Core.IRepository;
 using Swiggy.Data;
 using Swiggy.Models;
+using System.Security.Claims;
 
 namespace Swiggy.Core.Repository
 {
-    public class UserRepository :IUserRepository
+    public class UserRepository : IUserRepository
     {
         private readonly SwiggyDbContext dbContext;
+        private readonly IHttpContextAccessor httpContextAccessor;
+        //private SwiggyDbContext cox;
+        //public UserRepository(SwiggyDbContext cox)
+        //{
+        //    this.cox = cox;
+        //}
 
-        public UserRepository(SwiggyDbContext swiggyDbContext)
+        public UserRepository(SwiggyDbContext swiggyDbContext, IHttpContextAccessor _httpContextAccessor)
         {
             dbContext = swiggyDbContext;
+            httpContextAccessor = _httpContextAccessor;
         }
+
+        
+
         public async Task<UserModel> Register(AddUserModel user)
         {
             try
@@ -30,11 +44,11 @@ namespace Swiggy.Core.Repository
                     Email = user.Email,
                     Mobile = user.Mobile,
                     Password = user.Password,
-                    UserName = user.UserName
-
+                    UserName = user.UserName,
+                  //  Role = user.Role,
                 };
                 await dbContext.Users.AddAsync(users);
-                 dbContext.SaveChanges();
+                await dbContext.SaveChangesAsync();
                 return users;
             }
             catch(Exception)
@@ -43,20 +57,35 @@ namespace Swiggy.Core.Repository
             }
 
         }
-        public UserModel SignIn(SignInModel signInModel)
+        public async Task<UserModel> SignIn(SignInModel signInModel)
         {
             try
             {
-                var login =  dbContext.Users.FirstOrDefault(x => x.Email == signInModel.Email && x.Password == signInModel.Password);
-               
+                var login =  dbContext.Users.Where(x => x.Email == signInModel.Email && x.Password == signInModel.Password).FirstOrDefault();
+               if(login == null)
+                {
+                    throw new Exception("Invalid login details");
+                }
+                var claims = new List<Claim>
+               {
+                   new Claim(ClaimTypes.NameIdentifier, login.Email),
+                  // new Claim(ClaimTypes.Role, login.Role)
+               };
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                var principal = new ClaimsPrincipal(identity);
+                await httpContextAccessor.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+
                     return login;
              
             }
             catch(Exception e)
             {
-                throw e;
+                throw new Exception(e.Message);
             }
         }
+        [Authorize(Roles ="Admin")]
         [HttpGet]
         public async Task<List<UserModel>> GetUsers()
         {
@@ -66,9 +95,9 @@ namespace Swiggy.Core.Repository
                 
                 return users;
             }
-            catch(Exception e)
+            catch(Exception )
             {
-                throw e;
+                throw new Exception();
             }
 
         }
@@ -89,11 +118,11 @@ namespace Swiggy.Core.Repository
                     return user;
 
                 }
-                return null;
+                throw new Exception();
             }
-            catch(Exception e)
+            catch(Exception )
             {
-                throw e;
+                throw new Exception();
             }
 
         }
@@ -104,13 +133,13 @@ namespace Swiggy.Core.Repository
             {
                 var user = await dbContext.Users.FindAsync(id);
                 if (user == null)
-                    return null;
+                    throw new Exception();
                 dbContext.Users.Remove(user);
                 return user;
             }
-            catch (Exception e)
+            catch (Exception )
             {
-                throw e;
+                throw new Exception();
             }
         }
     }

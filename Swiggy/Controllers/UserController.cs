@@ -20,7 +20,7 @@ namespace Swiggy.Controllers
         }
         [HttpPost]
         [Route("Register")]
-        public async Task<IActionResult> Register([FromBody] AddUserModel addUserModel)
+        public  IActionResult Register([FromBody] AddUserModel addUserModel)
         {
             try
             {
@@ -49,7 +49,7 @@ namespace Swiggy.Controllers
             {
                 var login = userRepository.SignIn(signInModel);
                 if (login == null)
-                    return NotFound();
+                    return NotFound("Invalid User Details");
                 return Ok("Logged Successfully");
             }
             catch(Exception e)
@@ -67,7 +67,7 @@ namespace Swiggy.Controllers
                 //    return NotFound();
                 //return Ok(users);
             }
-            catch(Exception e)
+            catch(Exception )
             {
                 return null;
             }
